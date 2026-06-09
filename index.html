@@ -72,7 +72,7 @@
         .hud-score-val { font-size: 14px; color: var(--pixel-yellow); }
         .hud-timer { font-size: 10px; color: var(--pixel-red); letter-spacing: 2px; }
 
-        /* CAMPO DE JOGO */
+        /* CAMPO DE JOGO RESPONSIVO (VMIN) */
         .pitch-container { flex: 1; background-color: var(--pitch-green); position: relative; margin: 8px; border: 4px solid #000000; background-image: linear-gradient(rgba(255,255,255,0.08) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,0.08) 2px, transparent 2px); background-size: 24px 24px; overflow: hidden; transition: all 0.3s; }
         .pitch-lines { position: absolute; width: 100%; height: 100%; top: 0; left: 0; border: 4px solid var(--pitch-line); pointer-events: none; }
         .pitch-center-line { position: absolute; top: 0; bottom: 0; left: 50%; width: 4px; background: var(--pitch-line); transform: translateX(-50%); }
@@ -81,21 +81,21 @@
         .box-left { left: 0; border-left: none; }
         .box-right { right: 0; border-right: none; }
 
-        /* JOGADORES */
+        /* JOGADORES (ESCALONADOS PARA A LOUSA) */
         .player-token { 
-    position: absolute; 
-    width: 4vmin; height: 4vmin; /* Era 18px */
-    border-radius: 50%; border: 0.5vmin solid #000000; /* Era 2px */
-    transform: translate(-50%, -50%); 
-    box-shadow: inset -0.2vmin -0.2vmin 0px rgba(0,0,0,0.4), 0.2vmin 0.2vmin 0px rgba(0,0,0,0.3); 
-    display: flex; justify-content: center; align-items: center; z-index: 5; transition: left 0.5s ease, top 0.5s ease; 
-}
-.player-token::after { content: attr(data-pos); font-size: 1.2vmin; color: #ffffff; text-shadow: 1px 1px 0px #000; font-weight: bold; }
-.player-name-label { position: absolute; bottom: -2.5vmin; left: 50%; transform: translateX(-50%); font-size: 1.5vmin; color: #ffffff; white-space: nowrap; text-transform: uppercase; text-shadow: 1px 1px 0px #000; pointer-events: none; z-index: 10; }
+            position: absolute; 
+            width: 4vmin; height: 4vmin;
+            border-radius: 50%; border: 0.5vmin solid #000000;
+            transform: translate(-50%, -50%); 
+            box-shadow: inset -0.2vmin -0.2vmin 0px rgba(0,0,0,0.4), 0.2vmin 0.2vmin 0px rgba(0,0,0,0.3); 
+            display: flex; justify-content: center; align-items: center; z-index: 5; transition: left 0.5s ease, top 0.5s ease; 
+        }
+        .player-token::after { content: attr(data-pos); font-size: 1.2vmin; color: #ffffff; text-shadow: 1px 1px 0px #000; font-weight: bold; }
+        .player-name-label { position: absolute; bottom: -2.5vmin; left: 50%; transform: translateX(-50%); font-size: 1.5vmin; color: #ffffff; white-space: nowrap; text-transform: uppercase; text-shadow: 1px 1px 0px #000; pointer-events: none; z-index: 10; }
 
         /* POSSE DE BOLA VISUAL */
         .has-ball { z-index: 20 !important; border-color: #fff !important; }
-        .has-ball::before { content: ''; position: absolute; width: 6px; height: 6px; background: #fff; border-radius: 50%; border: 1px solid #000; top: -4px; right: -4px; z-index: 21; animation: pulse-ball 0.5s infinite alternate; }
+        .has-ball::before { content: ''; position: absolute; width: 1vmin; height: 1vmin; background: #fff; border-radius: 50%; border: 1px solid #000; top: -0.5vmin; right: -0.5vmin; z-index: 21; animation: pulse-ball 0.5s infinite alternate; }
         @keyframes pulse-ball { 0% { transform: scale(1); box-shadow: 0 0 2px #fff; } 100% { transform: scale(1.5); box-shadow: 0 0 6px var(--pixel-yellow); } }
         @keyframes suspense-pulse { 0% { opacity: 0.5; } 100% { opacity: 1; transform: scale(1.05); } }
 
@@ -312,6 +312,28 @@
     </div>
 
     <script>
+        // =====================================================================
+        // ESPAÇO PARA AS TRILHAS SONORAS (COLE AS STRINGS BASE64 AQUI NAS ASPAS)
+        // =====================================================================
+        const BASE64_MUSICA_MENU = "";    // Ex: "data:audio/mpeg;base64,SUA_STRING_AQUI..."
+        const BASE64_MUSICA_PARTIDA = ""; // Ex: "data:audio/mpeg;base64,SUA_STRING_AQUI..."
+
+        let audioMenu = new Audio(); audioMenu.loop = true;
+        let audioPartida = new Audio(); audioPartida.loop = true;
+
+        if (BASE64_MUSICA_MENU) audioMenu.src = BASE64_MUSICA_MENU;
+        if (BASE64_MUSICA_PARTIDA) audioPartida.src = BASE64_MUSICA_PARTIDA;
+
+        function tocarMusicaMenu() {
+            audioPartida.pause(); audioPartida.currentTime = 0;
+            if (BASE64_MUSICA_MENU) audioMenu.play().catch(e => console.log("Aguardando interação para áudio..."));
+        }
+
+        function tocarMusicaPartida() {
+            audioMenu.pause(); audioMenu.currentTime = 0;
+            if (BASE64_MUSICA_PARTIDA) audioPartida.play().catch(e => console.log("Aguardando interação para áudio..."));
+        }
+
         // --- STATES BÁSICOS E CONFIGURAÇÕES ---
         let databaseTimes = [];
         let databaseQuestoes = { usual: [], critica: [] };
@@ -321,19 +343,10 @@
         let idTimeEmEdicao = null;
         let formacaoAtual = { gol: 1, zag: 4, vol: 2, mei: 3, ata: 1 };
         
-        // Coeficientes das posições continuam guiando o esticamento e proximidade de marcação
         const COEFICIENTE_POSICAO = { GOL: 0, ZAG: 0.3, VOL: 0.6, MEI: 0.9, ATA: 1.2 };
 
         // --- MODO TORNEIO ENGINE ---
-        let torneioData = {
-            ativo: false,
-            times: [],
-            faseAtual: 0, 
-            qtdTimes: 0,
-            vencedorSemi1: null,
-            vencedorSemi2: null,
-            minutosPadrao: 30
-        };
+        let torneioData = { ativo: false, times: [], faseAtual: 0, qtdTimes: 0, vencedorSemi1: null, vencedorSemi2: null, minutosPadrao: 30 };
 
         // --- MOTOR DA PARTIDA (GAME ENGINE) ---
         let timerInterval = null;
@@ -342,19 +355,25 @@
         let meioTempoSeg = 900;
         let etapaAtual = 0; 
         
-        let matchData = {
-            t1: null, t2: null, elencoT1: [], elencoT2: [],
-            isKickoff: true,
-            avancoIndividual: 0, 
-            posseDeBola: { time: 1, idxGlobal: 0 },
-            movimentoUsado: false, golsT1: 0, golsT2: 0
-        };
+        let matchData = { t1: null, t2: null, elencoT1: [], elencoT2: [], isKickoff: true, avancoIndividual: 0, posseDeBola: { time: 1, idxGlobal: 0 }, movimentoUsado: false, golsT1: 0, golsT2: 0 };
 
         let questaoAtiva = { tipoAcao: null, alvoId: null, respostaCorreta: "", isGolAtaque: false, isGolDefesa: false, timeAdvId: null, interceptadorId: null, timeDefesaId: null, goleiroId: null };
+
+        // Função para garantir que o relógio retome caso o modal de evento não esteja prendendo o fluxo
+        function retomarJogo() {
+            if (!document.getElementById('modal-evento-jogo').classList.contains('active') && etapaAtual > 0) {
+                iniciarRelogio();
+            }
+        }
 
         window.onload = () => {
             sincronizarBancoDados();
             if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+            
+            // Destrava áudio do menu assim que o usuário clicar em qualquer canto da tela pela primeira vez
+            document.body.addEventListener('click', () => {
+                if(currentActiveScreen === 'home' || currentActiveScreen === 'times' || currentActiveScreen === 'questoes') tocarMusicaMenu();
+            }, { once: true });
         };
 
         window.handleAndroidBack = function() {
@@ -375,7 +394,7 @@
         function persistirBancoDados() { localStorage.setItem('copinha_mat_db', JSON.stringify({ times: databaseTimes, questoes: databaseQuestoes })); }
 
         function alternarTelas(idAlvo) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('screen-' + idAlvo).classList.add('active'); currentActiveScreen = idAlvo; }
-        function voltarParaHome() { alternarTelas('home'); document.querySelectorAll('.player-token').forEach(p => p.remove()); torneioData.ativo = false; }
+        function voltarParaHome() { alternarTelas('home'); document.querySelectorAll('.player-token').forEach(p => p.remove()); torneioData.ativo = false; tocarMusicaMenu(); }
         function navegarParaTimes() { alternarTelas('times'); renderizarListaTimes(); }
         function navegarParaQuestoes() { alternarTelas('questoes'); renderizarBancoQuestoes(); }
 
@@ -520,7 +539,6 @@
                 let timesSelecionados = checkeds.map(cb => databaseTimes[cb.value]);
                 
                 torneioData.ativo = true;
-                // Embaralha para montar as chaves aleatoriamente
                 torneioData.times = timesSelecionados.sort(() => Math.random() - 0.5);
                 torneioData.qtdTimes = timesSelecionados.length;
                 torneioData.faseAtual = 1;
@@ -687,7 +705,7 @@
             else executarFisicaAcao(tipo, alvoId);
         }
 
-        // --- SISTEMA DE QUESTÕES (USUAIS / CRÍTICAS) ---
+        // --- SISTEMA DE QUESTÕES (CONGELA TEMPO) ---
         function sortearQuestao(tipoAlvo) {
             let banco = databaseQuestoes[tipoAlvo];
             if (!banco || banco.length === 0) { let a = Math.floor(Math.random()*9)+1; let b = Math.floor(Math.random()*9)+1; return { p: `Quanto é ${a} + ${b}?`, r: (a+b).toString() }; }
@@ -695,6 +713,7 @@
         }
 
         function prepararPerguntaInterceptacao(tipoAcao, alvoId) {
+            clearInterval(timerInterval); // PAUSA O RELÓGIO
             let isT1 = matchData.posseDeBola.time === 1;
             let timeAdv = isT1 ? matchData.t2 : matchData.t1;
             let elencoAdv = isT1 ? matchData.elencoT2 : matchData.elencoT1;
@@ -713,6 +732,7 @@
         }
 
         function prepararPerguntaGolAtaque() {
+            clearInterval(timerInterval); // PAUSA O RELÓGIO
             let isT1 = matchData.posseDeBola.time === 1;
             let atacante = (isT1 ? matchData.elencoT1 : matchData.elencoT2).find(j => j.idLocal === matchData.posseDeBola.idxGlobal);
             
@@ -728,6 +748,7 @@
         }
 
         function prepararPerguntaGolDefesa() {
+            clearInterval(timerInterval); // PAUSA O RELÓGIO (Garantia extra)
             let isT1 = matchData.posseDeBola.time === 1;
             let timeDefesa = isT1 ? matchData.t2 : matchData.t1; let elencoDefesa = isT1 ? matchData.elencoT2 : matchData.elencoT1;
             let goleiro = elencoDefesa.find(j => j.pos === 'GOL') || elencoDefesa[0];
@@ -746,33 +767,52 @@
             let isCorrect = (userAns === questaoAtiva.respostaCorreta);
             
             if (questaoAtiva.isGolAtaque) {
-    if (isCorrect) {
-        fecharModal('modal-pergunta');
-        // MENSAGEM DE SUSPENSE ANTES DO GOLEIRO DEFENDER
-        document.getElementById('suspense-msg').innerText = "O goleiro prepara a defesa...";
-        abrirModal('modal-suspense');
-        setTimeout(() => {
-            fecharModal('modal-suspense');
-            prepararPerguntaGolDefesa();
-        }, 2000); // 2 segundos de suspense antes da questão do goleiro
-    } else {
+                if (isCorrect) {
+                    fecharModal('modal-pergunta');
+                    // NOVO SUSPENSE DO GOLEIRO ANTES DA PERGUNTA FINAL DE DEFESA
+                    document.getElementById('suspense-msg').innerText = "O goleiro prepara a defesa...";
+                    abrirModal('modal-suspense');
+                    setTimeout(() => {
+                        fecharModal('modal-suspense');
+                        prepararPerguntaGolDefesa();
+                    }, 3000); 
+                } else {
+                    fecharModal('modal-pergunta');
                     configurarModalEvento("PARA FORA!", "O atacante errou o cálculo e isolou a bola. Tiro de meta.", "Continuar", () => {
                         fecharModal('modal-evento-jogo'); matchData.avancoIndividual = 0; sortearPosse(questaoAtiva.timeDefesaId); renderizarMotorDeCampo();
+                        retomarJogo(); // RETOMA O RELÓGIO
                     });
                 }
             } else if (questaoAtiva.isGolDefesa) {
                 fecharModal('modal-pergunta');
-                if (isCorrect) {
-                    configurarModalEvento("ESPALMOU!!!", "O goleiro defendeu com precisão matemática! Posse de bola.", "Continuar", () => {
-                        fecharModal('modal-evento-jogo'); matchData.avancoIndividual = 0; matchData.posseDeBola = { time: questaoAtiva.timeDefesaId, idxGlobal: questaoAtiva.goleiroId }; matchData.movimentoUsado = false; renderizarMotorDeCampo();
-                    });
-                } else registrarGol();
+                
+                // NOVO SUSPENSE PÓS RESPOSTA DO GOLEIRO (Avaliando a defesa)
+                document.getElementById('suspense-msg').innerText = "Avaliando a defesa...";
+                abrirModal('modal-suspense');
+                
+                setTimeout(() => {
+                    fecharModal('modal-suspense');
+                    if (isCorrect) {
+                        configurarModalEvento("ESPALMOU!!!", "O goleiro defendeu com precisão matemática! Posse de bola.", "Continuar", () => {
+                            fecharModal('modal-evento-jogo'); matchData.avancoIndividual = 0; matchData.posseDeBola = { time: questaoAtiva.timeDefesaId, idxGlobal: questaoAtiva.goleiroId }; matchData.movimentoUsado = false; renderizarMotorDeCampo();
+                            retomarJogo(); // RETOMA O RELÓGIO
+                        });
+                    } else {
+                        registrarGol();
+                    }
+                }, 3000);
+
             } else {
                 fecharModal('modal-pergunta');
-                if (isCorrect) { tocarApito(true); executarFisicaAcao(questaoAtiva.tipoAcao, questaoAtiva.alvoId); }
+                if (isCorrect) { 
+                    tocarApito(true); 
+                    executarFisicaAcao(questaoAtiva.tipoAcao, questaoAtiva.alvoId); 
+                    retomarJogo(); // RETOMA O RELÓGIO
+                }
                 else {
                     configurarModalEvento("PERDEU A BOLA!", "Cálculo errado. A posse de bola foi roubada pela marcação.", "Continuar", () => {
                         fecharModal('modal-evento-jogo'); matchData.avancoIndividual = 0; matchData.posseDeBola = { time: questaoAtiva.timeAdvId, idxGlobal: questaoAtiva.interceptadorId }; matchData.movimentoUsado = false; renderizarMotorDeCampo();
+                        retomarJogo(); // RETOMA O RELÓGIO
                     });
                 }
             }
@@ -823,13 +863,14 @@
             let timePerdedor = matchData.posseDeBola.time === 1 ? 2 : 1;
             configurarModalEvento("GOLAÇO!!!", "A bola volta para o meio-campo.", "Recomeçar", () => {
                 sortearPosse(timePerdedor); renderizarMotorDeCampo(); fecharModal('modal-evento-jogo');
+                retomarJogo(); // RETOMA O RELÓGIO
             });
         }
 
         function formatarTempo(segs) { let m = Math.floor(segs / 60).toString().padStart(2, '0'); let s = (segs % 60).toString().padStart(2, '0'); return `${m}:${s}`; }
 
-        function dispararPrimeiroTempo() { fecharModal('modal-evento-jogo'); etapaAtual = 1; sortearPosse(); renderizarMotorDeCampo(); iniciarRelogio(); }
-        function dispararSegundoTempo() { fecharModal('modal-evento-jogo'); etapaAtual = 2; sortearPosse(); renderizarMotorDeCampo(); iniciarRelogio(); }
+        function dispararPrimeiroTempo() { fecharModal('modal-evento-jogo'); etapaAtual = 1; sortearPosse(); renderizarMotorDeCampo(); tocarMusicaPartida(); iniciarRelogio(); }
+        function dispararSegundoTempo() { fecharModal('modal-evento-jogo'); etapaAtual = 2; sortearPosse(); renderizarMotorDeCampo(); tocarMusicaPartida(); iniciarRelogio(); }
 
         function iniciarRelogio() {
             clearInterval(timerInterval);
@@ -838,11 +879,11 @@
                 document.getElementById('cronometro-display').innerText = formatarTempo(segundosPartida);
                 
                 if (segundosPartida === meioTempoSeg && etapaAtual === 1) {
-                    clearInterval(timerInterval); tocarApitoDuplo();
+                    clearInterval(timerInterval); tocarApitoDuplo(); audioPartida.pause();
                     configurarModalEvento("Fim do 1º Tempo", "Inversão de Lados", "Ir para o 2º Tempo", dispararSegundoTempo);
                 } 
                 else if (segundosPartida >= tempoTotalSeg) {
-                    clearInterval(timerInterval); tocarApitoDuplo(); setTimeout(() => tocarApito(false), 800);
+                    clearInterval(timerInterval); tocarApitoDuplo(); setTimeout(() => tocarApito(false), 800); audioPartida.pause();
                     processarFimDeJogo();
                 }
             }, 1000);
