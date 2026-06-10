@@ -1,0 +1,123 @@
+{
+  "times": [
+    {
+      "id": 1717888800000,
+      "nome": "Águias da Matemática",
+      "sigla": "AGU",
+      "cor": "#e53935",
+      "formacao": { "gol": 1, "zag": 4, "vol": 2, "mei": 3, "ata": 1 },
+      "nomesCatalogados": [
+        { "pos": "gol", "idx": 1, "nome": "Goleiro A" },
+        { "pos": "zag", "idx": 1, "nome": "Zagueiro 1" },
+        { "pos": "zag", "idx": 2, "nome": "Zagueiro 2" },
+        { "pos": "zag", "idx": 3, "nome": "Zagueiro 3" },
+        { "pos": "zag", "idx": 4, "nome": "Zagueiro 4" },
+        { "pos": "vol", "idx": 1, "nome": "Volante 1" },
+        { "pos": "vol", "idx": 2, "nome": "Volante 2" },
+        { "pos": "mei", "idx": 1, "nome": "Meia 1" },
+        { "pos": "mei", "idx": 2, "nome": "Meia 2" },
+        { "pos": "mei", "idx": 3, "nome": "Meia 3" },
+        { "pos": "ata", "idx": 1, "nome": "Atacante 1" }
+      ],
+      "totalJogadores": 11
+    },
+    {
+      "id": 1717888800001,
+      "nome": "Tubarões Numéricos",
+      "sigla": "TUB",
+      "cor": "#1e88e5",
+      "formacao": { "gol": 1, "zag": 4, "vol": 2, "mei": 3, "ata": 1 },
+      "nomesCatalogados": [
+        { "pos": "gol", "idx": 1, "nome": "Goleiro B" },
+        { "pos": "zag", "idx": 1, "nome": "ZAG 1" },
+        { "pos": "zag", "idx": 2, "nome": "ZAG 2" },
+        { "pos": "zag", "idx": 3, "nome": "ZAG 3" },
+        { "pos": "zag", "idx": 4, "nome": "ZAG 4" },
+        { "pos": "vol", "idx": 1, "nome": "VOL 1" },
+        { "pos": "vol", "idx": 2, "nome": "VOL 2" },
+        { "pos": "mei", "idx": 1, "nome": "MEI 1" },
+        { "pos": "mei", "idx": 2, "nome": "MEI 2" },
+        { "pos": "mei", "idx": 3, "nome": "MEI 3" },
+        { "pos": "ata", "idx": 1, "nome": "ATA 1" }
+      ],
+      "totalJogadores": 11
+    },
+    {
+      "id": 1717888800002,
+      "nome": "Falcões Geométricos",
+      "sigla": "FAL",
+      "cor": "#fb8c00",
+      "formacao": { "gol": 1, "zag": 4, "vol": 2, "mei": 3, "ata": 1 },
+      "nomesCatalogados": [
+        { "pos": "gol", "idx": 1, "nome": "Goleiro C" },
+        { "pos": "zag", "idx": 1, "nome": "ZAG C1" },
+        { "pos": "zag", "idx": 2, "nome": "ZAG C2" },
+        { "pos": "zag", "idx": 3, "nome": "ZAG C3" },
+        { "pos": "zag", "idx": 4, "nome": "ZAG C4" },
+        { "pos": "vol", "idx": 1, "nome": "VOL C1" },
+        { "pos": "vol", "idx": 2, "nome": "VOL C2" },
+        { "pos": "mei", "idx": 1, "nome": "MEI C1" },
+        { "pos": "mei", "idx": 2, "nome": "MEI C2" },
+        { "pos": "mei", "idx": 3, "nome": "MEI C3" },
+        { "pos": "ata", "idx": 1, "nome": "ATA C1" }
+      ],
+      "totalJogadores": 11
+    }
+  ],
+  "questoes": {
+    "usual": [
+      { "p": "Quanto é 14 + 23?", "r": "37" },
+      { "p": "Quanto é 32 + 15?", "r": "47" },
+      { "p": "Quanto é 45 + 24?", "r": "69" },
+      { "p": "Quanto é 51 + 37?", "r": "88" },
+      { "p": "Quanto é 63 + 25?", "r": "88" },
+      { "p": "Quanto é 72 + 16?", "r": "88" },
+      { "p": "Quanto é 21 + 48?", "r": "69" },
+      { "p": "Quanto é 13 + 55?", "r": "68" },
+      { "p": "Quanto é 38 - 15?", "r": "23" },
+      { "p": "Quanto é 47 - 22?", "r": "25" },
+      { "p": "Quanto é 59 - 34?", "r": "25" },
+      { "p": "Quanto é 66 - 41?", "r": "25" },
+      { "p": "Quanto é 75 - 53?", "r": "22" },
+      { "p": "Quanto é 89 - 66?", "r": "23" },
+      { "p": "Quanto é 94 - 71?", "r": "23" },
+      { "p": "Quanto é 28 - 14?", "r": "14" },
+      { "p": "Resolva: 2 x 6", "r": "12" },
+      { "p": "Resolva: 2 x 8", "r": "16" },
+      { "p": "Resolva: 2 x 9", "r": "18" },
+      { "p": "Resolva: 3 x 4", "r": "12" },
+      { "p": "Resolva: 3 x 6", "r": "18" },
+      { "p": "Resolva: 3 x 7", "r": "21" },
+      { "p": "Resolva: 3 x 8", "r": "24" },
+      { "p": "Resolva: 3 x 9", "r": "27" }
+    ],
+    "critica": [
+      { "p": "Atenção (Reserva)! Quanto é 47 + 25?", "r": "72" },
+      { "p": "Atenção (Reserva)! Quanto é 58 + 36?", "r": "94" },
+      { "p": "Atenção (Reserva)! Quanto é 89 + 44?", "r": "133" },
+      { "p": "Atenção (Reserva)! Quanto é 156 + 28?", "r": "184" },
+      { "p": "Atenção (Reserva)! Quanto é 238 + 145?", "r": "383" },
+      { "p": "Atenção (Reserva)! Quanto é 374 + 259?", "r": "633" },
+      { "p": "Atenção (Reserva)! Quanto é 485 + 326?", "r": "811" },
+      { "p": "Atenção (Reagrupamento)! Quanto é 52 - 27?", "r": "25" },
+      { "p": "Atenção (Reagrupamento)! Quanto é 74 - 38?", "r": "36" },
+      { "p": "Atenção (Reagrupamento)! Quanto é 91 - 45?", "r": "46" },
+      { "p": "Atenção (Reagrupamento)! Quanto é 132 - 56?", "r": "76" },
+      { "p": "Atenção (Reagrupamento)! Quanto é 245 - 168?", "r": "77" },
+      { "p": "Atenção (Reagrupamento)! Quanto é 413 - 259?", "r": "154" },
+      { "p": "Atenção (Reagrupamento)! Quanto é 502 - 184?", "r": "318" },
+      { "p": "Tabuada do 4: Quanto é 4 x 7?", "r": "28" },
+      { "p": "Tabuada do 4: Quanto é 4 x 8?", "r": "32" },
+      { "p": "Tabuada do 4: Quanto é 4 x 9?", "r": "36" },
+      { "p": "Tabuada do 5: Quanto é 5 x 6?", "r": "30" },
+      { "p": "Tabuada do 5: Quanto é 5 x 8?", "r": "40" },
+      { "p": "Tabuada do 5: Quanto é 5 x 9?", "r": "45" },
+      { "p": "Desafio Crítico: Quanto é 4 x 12?", "r": "48" },
+      { "p": "Desafio Crítico: Quanto é 5 x 15?", "r": "75" },
+      { "p": "Desafio Crítico: Quanto é 108 + 293?", "r": "401" },
+      { "p": "Desafio Crítico: Quanto é 300 - 145?", "r": "155" },
+      { "p": "Desafio Crítico: Quanto é 5 x 11?", "r": "55" },
+      { "p": "Desafio Crítico: Quanto é 605 - 287?", "r": "318" }
+    ]
+  }
+}
