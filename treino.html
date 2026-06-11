@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Treino de Precisão - Eidos</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-dark: #1b1b1b;
+            --bg-ui: #2c2c2c;
+            --pixel-yellow: #ffd700;
+            --pixel-red: #ff5252;
+            --pixel-blue: #2196f3;
+            --pixel-green: #4caf50;
+            --border-color: #000000;
+            --text-color: #ffffff;
+        }
+
+        * { box-sizing: border-box; user-select: none; font-family: 'Press Start 2P', cursive; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; padding: 0; background-color: var(--bg-dark); color: var(--text-color); overflow: hidden; touch-action: manipulation; }
+
+        h1 { font-size: 14px; text-align: center; color: var(--pixel-yellow); text-shadow: 3px 3px #000; margin: 20px 0; line-height: 1.6; }
+        h2 { font-size: 11px; margin: 10px 0; color: #fff; text-shadow: 2px 2px #000; text-transform: uppercase; }
+        label, p { font-size: 8px; line-height: 1.5; color: #bbbbbb; }
+
+        .screen { display: none; width: 100vw; height: 100vh; flex-direction: column; padding: 12px; position: absolute; top: 0; left: 0; }
+        .screen.active { display: flex; }
+
+        .btn { background-color: #cccccc; color: #000000; border: 4px solid var(--border-color); padding: 12px; margin: 6px 0; font-size: 9px; text-align: center; cursor: pointer; box-shadow: 3px 3px 0px #000; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s; }
+        .btn:active { box-shadow: 0px 0px 0px #000; transform: translate(3px, 3px); }
+        .btn.primary { background-color: var(--pixel-yellow); }
+        .btn.danger { background-color: var(--pixel-red); color: #fff; }
+        .btn.success { background-color: var(--pixel-green); color: #fff; }
+        .btn.info { background-color: var(--pixel-blue); color: #fff; }
+        .btn.icon-only { padding: 8px; margin: 0; width: 36px; height: 36px; flex-shrink: 0; }
+        .btn.disabled { opacity: 0.5; pointer-events: none; box-shadow: none; transform: none; }
+
+        input, select { width: 100%; padding: 12px; margin-bottom: 12px; background: #ffffff; border: 4px solid var(--border-color); font-size: 9px; color: #000000; outline: none; }
+        select { appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M0 2h10L5 8z'/></svg>"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; }
+
+        .svg-icon { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+        .svg-icon svg { width: 16px; height: 16px; fill: currentColor; }
+
+        .screen-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 4px solid #000; padding-bottom: 10px; margin-bottom: 10px; }
+        .list-container { flex: 1; overflow-y: auto; padding-right: 4px; }
+        
+        /* Modais */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); justify-content: center; align-items: center; z-index: 100; }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: var(--bg-ui); border: 4px solid #000000; padding: 16px; width: 92%; max-width: 360px; max-height: 88vh; overflow-y: auto; box-shadow: 5px 5px 0px #000000; }
+
+        /* Construtor de Equações (Sem Teclado) */
+        .equation-builder { display: flex; flex-direction: column; gap: 10px; background: #111; border: 4px solid #000; padding: 10px; margin-bottom: 15px; }
+        .stepper-row { display: flex; align-items: center; justify-content: space-between; gap: 5px; }
+        .stepper-val { flex: 1; text-align: center; font-size: 14px; color: var(--pixel-yellow); background: #000; border: 2px solid #333; padding: 10px 0; }
+        .stepper-btn { padding: 8px; background: #333; color: #fff; border: 2px solid #000; cursor: pointer; font-size: 8px; }
+        .stepper-btn:active { background: #555; }
+        .eq-result-box { text-align: center; padding: 10px; background: var(--pixel-blue); color: #fff; border: 4px solid #000; font-size: 10px; }
+
+        /* HUD Jogo */
+        .game-area { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .hud-top { display: flex; justify-content: space-between; align-items: center; width: 100%; border-bottom: 4px solid #000; padding-bottom: 10px; }
+        .timer-box { font-size: 18px; color: var(--pixel-yellow); text-shadow: 2px 2px #000; }
+        .timer-box.warning { color: var(--pixel-red); animation: pulse 1s infinite alternate; }
+        .q-type-badge { padding: 6px 10px; background: #000; border: 2px solid #fff; font-size: 8px; color: #fff; }
+        
+        .question-card { background: var(--bg-ui); border: 4px solid #000; box-shadow: 5px 5px 0 #000; padding: 30px 15px; text-align: center; width: 100%; margin: 20px 0; }
+        .question-text { font-size: 18px; line-height: 1.5; color: #fff; }
+        .answer-text { font-size: 12px; color: var(--pixel-yellow); margin-top: 20px; display: none; }
+        .answer-text.visible { display: block; }
+
+        .game-controls { display: flex; gap: 10px; width: 100%; justify-content: space-between; }
+        .game-controls .btn { flex: 1; font-size: 10px; padding: 15px; }
+
+        .score-board { display: flex; justify-content: space-around; width: 100%; margin-top: 20px; font-size: 8px; color: #888; }
+        .score-item span { color: #fff; font-size: 10px; margin-left: 5px; }
+
+        @keyframes pulse { 0% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        /* Sanfonas do Banco */
+        .sanfona-header { background: var(--bg-ui); border: 4px solid #000; padding: 12px; margin-top: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 9px; text-transform: uppercase; }
+        .sanfona-body { border: 4px solid #000; border-top: none; background: #111; padding: 10px; display: none; max-height: 40vh; overflow-y: auto; }
+        .q-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #444; padding: 10px 0; gap: 10px; }
+        .q-textos { flex: 1; }
+        .q-enunciado { font-size: 8px; color: #fff; margin-bottom: 6px; line-height: 1.4; }
+        .q-resposta { font-size: 8px; color: var(--pixel-yellow); }
+    </style>
+</head>
+<body>
+
+    <div id="screen-home" class="screen active">
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; max-width:360px; margin:0 auto; width:100%;">
+            <h1>TREINO DE<br>PRECISÃO</h1>
+            <p style="text-align: center; margin-bottom: 30px;">Matemática - Eidos</p>
+            
+            <div class="btn primary" onclick="prepararTreino()">Iniciar Treino</div>
+            <div class="btn info" onclick="navegarConfigs()">Configurações</div>
+        </div>
+    </div>
+
+    <div id="screen-config" class="screen">
+        <div class="screen-header">
+            <div class="btn icon-only" onclick="voltarParaHome()"><div class="svg-icon"><svg viewBox="0 0 16 16"><path d="M14 6H4.8l4.3-4.3L7.7.3.3 7.7l7.4 7.4 1.4-1.4L4.8 9H14V6z"/></svg></div></div>
+            <h2>Ajustes</h2>
+            <div style="width:36px;"></div> </div>
+
+        <div class="list-container">
+            <label>Tempo Padrão (Segundos):</label>
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom: 20px;">
+                <div class="btn icon-only" onclick="ajustarTempoPadrao(-10)">-10</div>
+                <div style="flex:1; text-align:center; font-size:12px; color:var(--pixel-yellow);" id="lbl-tempo-padrao">60s</div>
+                <div class="btn icon-only" onclick="ajustarTempoPadrao(10)">+10</div>
+            </div>
+
+            <div class="screen-header" style="margin-top:20px;">
+                <h2>Banco de Questões</h2>
+                <div class="btn icon-only primary" onclick="abrirModalBuilder()"><div class="svg-icon"><svg viewBox="0 0 16 16"><path d="M6 1v5H1v2h5v5h2V8h5V6H8V1H6z"/></svg></div></div>
+            </div>
+
+            <div class="sanfona-header" onclick="toggleSanfona('acc-usual')"><span>Usuais (<span id="qtd-usual">0</span>)</span><span>▼</span></div>
+            <div class="sanfona-body" id="acc-usual"></div>
+            
+            <div class="sanfona-header" onclick="toggleSanfona('acc-critica')"><span>Críticas (<span id="qtd-critica">0</span>)</span><span>▼</span></div>
+            <div class="sanfona-body" id="acc-critica"></div>
+        </div>
+    </div>
+
+    <div id="screen-game" class="screen">
+        <div class="hud-top">
+            <div class="btn icon-only danger" onclick="abrirModalConfirmarSaida()" style="margin:0;"><div class="svg-icon"><svg viewBox="0 0 16 16"><path d="M4 3h8v2H4zM5 6h6v7H5zM6 1h4v1H6z"/></svg></div></div>
+            <div class="timer-box" id="game-timer">01:00</div>
+            <div class="btn icon-only info" onclick="togglePauseGame()" style="margin:0;" id="btn-pause"><div class="svg-icon"><svg viewBox="0 0 16 16"><path d="M2 2h4v12H2zm8 0h4v12h-4z"/></svg></div></div>
+        </div>
+
+        <div class="game-area">
+            <div class="q-type-badge" id="lbl-tipo-q">USUAL</div>
+            
+            <div class="question-card">
+                <div class="question-text" id="game-q-texto">Carregando...</div>
+                <div class="answer-text" id="game-q-resposta">R: --</div>
+            </div>
+
+            <div class="game-controls">
+                <div class="btn danger" onclick="registrarResposta(false)"><div class="svg-icon"><svg viewBox="0 0 16 16"><path d="M14 3.4L12.6 2 8 6.6 3.4 2 2 3.4 6.6 8 2 12.6 3.4 14 8 9.4 12.6 14 14 12.6 9.4 8z"/></svg></div> Errou</div>
+                <div class="btn info" onclick="mostrarGabarito()" id="btn-gabarito">Gabarito</div>
+                <div class="btn success" onclick="registrarResposta(true)"><div class="svg-icon"><svg viewBox="0 0 16 16"><path d="M5.5 12L1 7.5 2.5 6l3 3 8-8L15 2.5z"/></svg></div> Acertou</div>
+            </div>
+
+            <div class="score-board">
+                <div class="score-item">Acertos: <span id="score-certo" style="color:var(--pixel-green);">0</span></div>
+                <div class="score-item">Erros: <span id="score-erro" style="color:var(--pixel-red);">0</span></div>
+                <div class="score-item">Total: <span id="score-total">0</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-builder" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Criar Questão</h2>
+            
+            <div class="equation-builder">
+                <div class="stepper-row">
+                    <div class="stepper-btn" onclick="ajustarBuildVar('A', -10)">-10</div>
+                    <div class="stepper-btn" onclick="ajustarBuildVar('A', -1)">-1</div>
+                    <div class="stepper-val" id="build-val-a">0</div>
+                    <div class="stepper-btn" onclick="ajustarBuildVar('A', 1)">+1</div>
+                    <div class="stepper-btn" onclick="ajustarBuildVar('A', 10)">+10</div>
+                </div>
+                
+                <select id="build-op" onchange="calcularBuildResult()">
+                    <option value="+">Somar (+)</option>
+                    <option value="-">Subtrair (-)</option>
+                    <option value="x">Multiplicar (x)</option>
+                    <option value="/">Dividir (/)</option>
+                </select>
+
+                <div class="stepper-row">
+                    <div class="stepper-btn" onclick="ajustarBuildVar('B', -10)">-10</div>
+                    <div class="stepper-btn" onclick="ajustarBuildVar('B', -1)">-1</div>
+                    <div class="stepper-val" id="build-val-b">0</div>
+                    <div class="stepper-btn" onclick="ajustarBuildVar('B', 1)">+1</div>
+                    <div class="stepper-btn" onclick="ajustarBuildVar('B', 10)">+10</div>
+                </div>
+
+                <div class="eq-result-box">
+                    Resposta: <span id="build-res" style="font-size: 14px; font-weight: bold;">0</span>
+                </div>
+            </div>
+
+            <label>Nível da Questão:</label>
+            <select id="build-nivel">
+                <option value="usual">Usual (Básica)</option>
+                <option value="critica">Crítica (Desafio)</option>
+            </select>
+
+            <div class="btn primary" onclick="salvarQuestaoConstruida()">Adicionar ao Banco</div>
+            <div class="btn danger" onclick="fecharModal('modal-builder')">Cancelar</div>
+        </div>
+    </div>
+
+    <div id="modal-pause" class="modal-overlay" style="z-index: 200;">
+        <div class="modal-content" style="text-align: center; border-color: var(--pixel-blue);">
+            <h2 style="color: var(--pixel-blue);">PAUSADO</h2>
+            <p style="margin-bottom: 20px;">O tempo está congelado para correção/explicação.</p>
+            <div class="btn primary" onclick="togglePauseGame()">Retomar Treino</div>
+        </div>
+    </div>
+
+    <div id="modal-feedback" class="modal-overlay" style="z-index: 200;">
+        <div class="modal-content" style="text-align: center; border: none; background: transparent; box-shadow: none;">
+            <h2 id="feedback-txt" style="font-size: 32px; text-shadow: 4px 4px #000;">BOA!</h2>
+        </div>
+    </div>
+
+    <div id="modal-confirmar-saida" class="modal-overlay">
+        <div class="modal-content" style="text-align: center;">
+            <h2>Sair do Treino?</h2>
+            <p style="margin-bottom: 15px;">O progresso atual será perdido.</p>
+            <div class="btn danger" onclick="abandonarTreino()">Sim, Sair</div>
+            <div class="btn success" onclick="fecharModal('modal-confirmar-saida')">Continuar</div>
+        </div>
+    </div>
+
+    <script>
+        // --- ESTADO GLOBAL E BANCO PRÉVIO ---
+        let db = {
+            configs: { tempoDefault: 60 },
+            questoes: {
+                usual: [
+                    { p: "Quanto é 14 + 23?", r: "37" },
+                    { p: "Quanto é 45 + 24?", r: "69" },
+                    { p: "Quanto é 38 - 15?", r: "23" },
+                    { p: "Quanto é 47 - 22?", r: "25" },
+                    { p: "Resolva: 2 x 6", r: "12" },
+                    { p: "Resolva: 3 x 4", r: "12" }
+                ],
+                critica: [
+                    { p: "Atenção! Quanto é 47 + 25?", r: "72" },
+                    { p: "Atenção! Quanto é 89 + 44?", r: "133" },
+                    { p: "Atenção! Quanto é 52 - 27?", r: "25" },
+                    { p: "Atenção! Quanto é 132 - 56?", r: "76" },
+                    { p: "Desafio: Quanto é 4 x 8?", r: "32" },
+                    { p: "Desafio: Quanto é 5 x 9?", r: "45" }
+                ]
+            }
+        };
+
+        let modalStack = [];
+        let currentScreen = 'home';
+        
+        // Estado do Jogo
+        let gameTimer = null;
+        let timeRemaining = 0;
+        let isPaused = false;
+        let proximoTipo = 'usual'; // Alternador: usual -> critica -> usual
+        let qAtual = null;
+        let placar = { certo: 0, erro: 0, total: 0 };
+
+        // Estado do Builder
+        let buildVars = { A: 0, B: 0 };
+
+        // --- INICIALIZAÇÃO ---
+        window.onload = () => {
+            let localDb = localStorage.getItem('eidos_treino_db');
+            if(localDb) { db = JSON.parse(localDb); }
+            else { salvarDb(); } // Salva o banco prévio no primeiro acesso
+            
+            if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+        };
+
+        function salvarDb() { localStorage.setItem('eidos_treino_db', JSON.stringify(db)); }
+
+        // --- NAVEGAÇÃO E MODAIS ---
+        window.handleAndroidBack = function() {
+            if (modalStack.length > 0) { 
+                let activeId = modalStack.pop(); 
+                document.getElementById(activeId).classList.remove('active');
+                if(activeId === 'modal-pause') { isPaused = false; iniciarRelogio(); }
+                return; 
+            }
+            if (currentScreen === 'game') { abrirModalConfirmarSaida(); return; }
+            if (currentScreen !== 'home') { voltarParaHome(); return; }
+            if (window.AppInventor) window.AppInventor.setWebViewString('VOLTAR_MENU');
+        };
+
+        function alternarTelas(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('screen-' + id).classList.add('active'); currentScreen = id; }
+        function voltarParaHome() { alternarTelas('home'); }
+        function navegarConfigs() { 
+            document.getElementById('lbl-tempo-padrao').innerText = db.configs.tempoDefault + "s";
+            renderizarBanco();
+            alternarTelas('config'); 
+        }
+
+        function abrirModal(id) { document.getElementById(id).classList.add('active'); modalStack.push(id); }
+        function fecharModal(id) { document.getElementById(id).classList.remove('active'); modalStack = modalStack.filter(m => m !== id); }
+
+        // --- CONFIGURAÇÕES ---
+        function ajustarTempoPadrao(delta) {
+            let n = db.configs.tempoDefault + delta;
+            if(n < 10) n = 10; if(n > 300) n = 300;
+            db.configs.tempoDefault = n;
+            document.getElementById('lbl-tempo-padrao').innerText = n + "s";
+            salvarDb();
+        }
+
+        // --- CONSTRUTOR DE QUESTÕES (BUILDER SEM TECLADO) ---
+        function abrirModalBuilder() {
+            buildVars = { A: 0, B: 0 };
+            document.getElementById('build-val-a').innerText = '0';
+            document.getElementById('build-val-b').innerText = '0';
+            document.getElementById('build-op').selectedIndex = 0;
+            document.getElementById('build-nivel').selectedIndex = 0;
+            calcularBuildResult();
+            abrirModal('modal-builder');
+        }
+
+        function ajustarBuildVar(variavel, delta) {
+            buildVars[variavel] += delta;
+            document.getElementById('build-val-' + variavel.toLowerCase()).innerText = buildVars[variavel];
+            calcularBuildResult();
+        }
+
+        function calcularBuildResult() {
+            let op = document.getElementById('build-op').value;
+            let res = 0;
+            if (op === '+') res = buildVars.A + buildVars.B;
+            else if (op === '-') res = buildVars.A - buildVars.B;
+            else if (op === 'x') res = buildVars.A * buildVars.B;
+            else if (op === '/') {
+                if(buildVars.B === 0) res = "Erro (Div/0)";
+                else res = parseFloat((buildVars.A / buildVars.B).toFixed(2));
+            }
+            document.getElementById('build-res').innerText = res;
+        }
+
+        function salvarQuestaoConstruida() {
+            let op = document.getElementById('build-op').value;
+            let nivel = document.getElementById('build-nivel').value;
+            let resTxt = document.getElementById('build-res').innerText;
+            
+            if (resTxt.includes("Erro")) { alert("Equação inválida."); return; }
+
+            let pergunta = `Quanto é ${buildVars.A} ${op} ${buildVars.B}?`;
+            db.questoes[nivel].push({ p: pergunta, r: resTxt });
+            salvarDb();
+            renderizarBanco();
+            fecharModal('modal-builder');
+        }
+
+        // --- BANCO UI ---
+        function toggleSanfona(id) { const el = document.getElementById(id); el.style.display = (el.style.display === 'block') ? 'none' : 'block'; }
+        
+        function renderizarBanco() {
+            document.getElementById('qtd-usual').innerText = db.questoes.usual.length;
+            document.getElementById('qtd-critica').innerText = db.questoes.critica.length;
+            
+            const gerar = (tipo, idRoot) => {
+                const root = document.getElementById(idRoot); root.innerHTML = '';
+                if(db.questoes[tipo].length === 0) { root.innerHTML = '<div style="font-size:7px; text-align:center;">Vazio.</div>'; return; }
+                db.questoes[tipo].forEach((q, idx) => {
+                    root.innerHTML += `<div class="q-item"><div class="q-textos"><div class="q-enunciado">${q.p}</div><div class="q-resposta">R: ${q.r}</div></div><div class="btn icon-only danger" onclick="excluirQuestao('${tipo}', ${idx})"><div class="svg-icon"><svg viewBox="0 0 16 16"><path d="M4 3h8v2H4zM5 6h6v7H5zM6 1h4v1H6z"/></svg></div></div></div>`;
+                });
+            };
+            gerar('usual', 'acc-usual'); gerar('critica', 'acc-critica');
+        }
+
+        function excluirQuestao(tipo, idx) { db.questoes[tipo].splice(idx, 1); salvarDb(); renderizarBanco(); }
+
+        // --- MOTOR DE GAMEPLAY ---
+        function prepararTreino() {
+            if(db.questoes.usual.length === 0 && db.questoes.critica.length === 0) {
+                alert("O banco de questões está vazio! Crie algumas em Ajustes."); return;
+            }
+            placar = { certo: 0, erro: 0, total: 0 };
+            atualizarPlacar();
+            proximoTipo = db.questoes.usual.length > 0 ? 'usual' : 'critica';
+            alternarTelas('game');
+            carregarProximaQuestao();
+        }
+
+        function carregarProximaQuestao() {
+            // Alterna o tipo se possível
+            if (proximoTipo === 'usual' && db.questoes.usual.length > 0) {
+                qAtual = db.questoes.usual[Math.floor(Math.random() * db.questoes.usual.length)];
+                proximoTipo = db.questoes.critica.length > 0 ? 'critica' : 'usual';
+                document.getElementById('lbl-tipo-q').innerText = "USUAL";
+                document.getElementById('lbl-tipo-q').style.borderColor = "#ffffff";
+                document.getElementById('lbl-tipo-q').style.color = "#ffffff";
+            } else if (db.questoes.critica.length > 0) {
+                qAtual = db.questoes.critica[Math.floor(Math.random() * db.questoes.critica.length)];
+                proximoTipo = db.questoes.usual.length > 0 ? 'usual' : 'critica';
+                document.getElementById('lbl-tipo-q').innerText = "CRÍTICA";
+                document.getElementById('lbl-tipo-q').style.borderColor = "var(--pixel-red)";
+                document.getElementById('lbl-tipo-q').style.color = "var(--pixel-red)";
+            } else {
+                qAtual = db.questoes.usual[Math.floor(Math.random() * db.questoes.usual.length)]; // Fallback
+            }
+
+            document.getElementById('game-q-texto').innerText = qAtual.p;
+            document.getElementById('game-q-resposta').innerText = "GABARITO: " + qAtual.r;
+            document.getElementById('game-q-resposta').classList.remove('visible');
+            document.getElementById('btn-gabarito').style.display = 'block';
+
+            timeRemaining = db.configs.tempoDefault;
+            atualizarDisplayTimer();
+            isPaused = false;
+            iniciarRelogio();
+        }
+
+        function mostrarGabarito() {
+            document.getElementById('game-q-resposta').classList.add('visible');
+            document.getElementById('btn-gabarito').style.display = 'none';
+        }
+
+        function iniciarRelogio() {
+            clearInterval(gameTimer);
+            gameTimer = setInterval(() => {
+                if(!isPaused) {
+                    timeRemaining--;
+                    atualizarDisplayTimer();
+                    if(timeRemaining <= 0) {
+                        clearInterval(gameTimer);
+                        registrarResposta(false, true); // Time out conta como erro automático opcional, ou apenas trava. Vamos travar e forçar o professor a agir.
+                        document.getElementById('game-timer').innerText = "ESGOTADO";
+                    }
+                }
+            }, 1000);
+        }
+
+        function atualizarDisplayTimer() {
+            let m = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+            let s = (timeRemaining % 60).toString().padStart(2, '0');
+            let box = document.getElementById('game-timer');
+            box.innerText = `${m}:${s}`;
+            if(timeRemaining <= 10) box.classList.add('warning');
+            else box.classList.remove('warning');
+        }
+
+        function togglePauseGame() {
+            if(isPaused) {
+                isPaused = false;
+                fecharModal('modal-pause');
+                iniciarRelogio();
+            } else {
+                isPaused = true;
+                clearInterval(gameTimer);
+                abrirModal('modal-pause');
+            }
+        }
+
+        function registrarResposta(acertou, isTimeout = false) {
+            clearInterval(gameTimer);
+            if(isTimeout) return; // Se esgotou o tempo, espera o professor clicar Certo/Errado manualmente.
+
+            placar.total++;
+            let feedTxt = document.getElementById('feedback-txt');
+            
+            if(acertou) { 
+                placar.certo++; 
+                feedTxt.innerText = "ACERTOU!"; 
+                feedTxt.style.color = "var(--pixel-green)"; 
+            } else { 
+                placar.erro++; 
+                feedTxt.innerText = "ERROU..."; 
+                feedTxt.style.color = "var(--pixel-red)"; 
+            }
+            
+            atualizarPlacar();
+            abrirModal('modal-feedback');
+            
+            setTimeout(() => {
+                fecharModal('modal-feedback');
+                carregarProximaQuestao();
+            }, 1500);
+        }
+
+        function atualizarPlacar() {
+            document.getElementById('score-certo').innerText = placar.certo;
+            document.getElementById('score-erro').innerText = placar.erro;
+            document.getElementById('score-total').innerText = placar.total;
+        }
+
+        function abrirModalConfirmarSaida() {
+            clearInterval(gameTimer); // Pausa tempo enquanto decide
+            abrirModal('modal-confirmar-saida');
+        }
+
+        function abandonarTreino() {
+            clearInterval(gameTimer);
+            fecharModal('modal-confirmar-saida');
+            voltarParaHome();
+        }
+
+    </script>
+</body>
+</html>
